@@ -15,31 +15,37 @@ const getRandomNumberInRanges = (outerMin, outerMax, innerMin, innerMax) => {
   const num = getRandomNumber(0, usableRange + 1);
   return num < threshold ? num - threshold : num - threshold + innerMax;
 }
-
-class Scene {
-  getSceneNode = () => document.querySelector(".scene")
-  getBirdsNode = () => document.querySelector(".birds")
-  getTemplateNode = () => document.querySelector(".template").content
-  getCounterNode = () => document.querySelector(".birds-counter__amount")
-}
+const scene = document.querySelector(".scene")
 
 class Controller {
   constructor() {
+    this.counter = document.querySelector(".birds-counter__amount")
+    this.removeBirdsButton = document.querySelector(".clear-birds")
     this.birds = []
     this.addEvents()
   }
 
   addEvents() {
-    scene.getSceneNode().addEventListener("click", this.onClickScene.bind(this));
+    scene.addEventListener("click", this.onClickScene.bind(this));
+    this.removeBirdsButton.addEventListener("click", this.onRemoveBirds.bind(this))
   }
 
   onClickScene(event) {
-    scene.getCounterNode().innerHTML = String(this.birds.push(new Bird(event.clientX, event.clientY)))
+    if (event.target.className === 'birds') {
+      event.stopPropagation();
+      this.counter.innerHTML = String(this.birds.push(new Bird(event.clientX, event.clientY)))
+    }
+  }
+
+  onRemoveBirds() {
+    this.birds.forEach((bird) => bird.removeBird())
   }
 }
 
 class Bird {
   constructor(x, y) {
+    this.template = document.querySelector(".template").content
+    this.birds = document.querySelector(".birds")
     this.positionX = x
     this.positionY = y
     this.mountBird()
@@ -47,12 +53,12 @@ class Bird {
   }
 
   addEvents() {
-    scene.getBirdsNode().addEventListener("click", this.onBirdClick);
+    scene.addEventListener("click", this.onBirdClick);
   }
 
   mountBird() {
     const birdColor = getRandomColor();
-    const clone = scene.getTemplateNode().cloneNode(true);
+    const clone = this.template.cloneNode(true);
     const birdClone = clone.querySelector(".bird");
     birdClone.style.left = `${this.positionX}px`;
     birdClone.style.top = `${this.positionY}px`;
@@ -60,7 +66,7 @@ class Bird {
     clone.querySelector(".bird__body").style.backgroundColor = birdColor;
     clone.querySelector(".bird__wing--left").style.backgroundColor = birdColor;
     clone.querySelector(".bird__wing--right").style.backgroundColor = birdColor;
-    scene.getBirdsNode().appendChild(clone)
+    this.birds.appendChild(clone)
   }
 
   onBirdClick = (event) => {
@@ -79,8 +85,15 @@ class Bird {
     }, BIRD_RETURN_TIME)
   }
 
+  removeBird() {
+    console.log("remove")
+    //1. myNode.textContent = '';
 
+    //2. const myNode = document.getElementById("foo");
+    //   while (myNode.lastElementChild) {
+    //     myNode.removeChild(myNode.lastElementChild);
+    //   }
+  }
 }
 
-const scene = new Scene()
 new Controller()
